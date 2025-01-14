@@ -20,6 +20,11 @@ class ValidationErrorsMiddleware implements MiddlewareInterface
     ) {
     }
 
+    /**
+     * @param  ServerRequestInterface  $request
+     * @param  RequestHandlerInterface  $handler
+     * @return ResponseInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($errors = $this->session->getFlash('errors')) {
