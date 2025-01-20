@@ -49,4 +49,14 @@ class CategoryService
         $this->entityManager->remove($category);
         $this->entityManager->flush();
     }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     * @throws ORMException
+     */
+    public function getById(int $id): ?Category
+    {
+        return $this->entityManager->find(Category::class, $id);
+    }
 }
