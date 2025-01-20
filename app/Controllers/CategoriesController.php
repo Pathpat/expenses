@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Contracts\RequestValidatorFactoryInterface;
 use App\RequestValidators\CreateCategoryRequestValidator;
+use App\ResponseFormatter;
 use App\Services\CategoryService;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
@@ -23,6 +24,7 @@ class CategoriesController
         private readonly Twig $twig,
         private readonly RequestValidatorFactoryInterface $requestValidatorFactory,
         private readonly CategoryService $categoryService,
+        private readonly ResponseFormatter $responseFormatter,
     ) {
     }
 
@@ -64,9 +66,26 @@ class CategoriesController
      */
     public function delete(Request $request, Response $response, array $args): Response
     {
-        // TODO
         $this->categoryService->delete((int)$args['id']);
 
         return $response->withHeader('Location', '/categories')->withStatus(302);
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     * @throws ORMException
+     */
+    public function get(Request $request, Response $response, array $args): Response
+    {
+        $category = $this->categoryService->getById((int)$args['id']);
+
+        if (!$category) {
+            return $response->withStatus(404);
+        }
+
+        $data = ['id' => $category->getId(), 'name' => $category->getName()];
+
+        return $this->responseFormatter->asJson($response, $data);
     }
 }
