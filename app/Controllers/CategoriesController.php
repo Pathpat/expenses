@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Contracts\RequestValidatorFactoryInterface;
 use App\RequestValidators\CreateCategoryRequestValidator;
+use App\RequestValidators\UpdateCategoryRequestValidator;
 use App\ResponseFormatter;
 use App\Services\CategoryService;
 use Doctrine\ORM\Exception\ORMException;
@@ -49,7 +50,6 @@ class CategoriesController
      */
     public function store(Request $request, Response $response): Response
     {
-        // TODO
         $data = $this->requestValidatorFactory->make(CreateCategoryRequestValidator::class)->validate(
             $request->getParsedBody()
         );
@@ -85,6 +85,28 @@ class CategoriesController
         }
 
         $data = ['id' => $category->getId(), 'name' => $category->getName()];
+
+        return $this->responseFormatter->asJson($response, $data);
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TransactionRequiredException
+     * @throws \JsonException
+     */
+    public function update(Request $request, Response $response, array $args): Response
+    {
+        $data = $this->requestValidatorFactory->make(UpdateCategoryRequestValidator::class)->validate(
+            $request->getParsedBody()
+        );
+        $category = $this->categoryService->getById((int)$args['id']);
+
+        if (!$category) {
+            return $response->withStatus(404);
+        }
+
+        $data = ['status' => 'ok'];
 
         return $this->responseFormatter->asJson($response, $data);
     }
