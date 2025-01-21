@@ -28,4 +28,9 @@ class RequestService
 
         return $referer;
     }
+
+    public function isXhr(ServerRequestInterface $request): bool
+    {
+        return $request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+    }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Contracts\SessionInterface;
+use App\Services\RequestService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -12,8 +13,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class StartSessionsMiddleware implements MiddlewareInterface
 {
-    public function __construct(private readonly SessionInterface $session)
-    {
+    public function __construct(
+        private readonly SessionInterface $session,
+        private readonly RequestService $requestService
+    ) {
     }
 
     /**
@@ -26,9 +29,8 @@ class StartSessionsMiddleware implements MiddlewareInterface
         $this->session->start();
 
         $response = $handler->handle($request);
-
-        // TODO: Check for XHR requests
-        if ($request->getMethod() === 'GET') {
+        
+        if ($request->getMethod() === 'GET' && !$this->requestService->isXhr($request)) {
             $this->session->put('previousUrl', (string)$request->getUri());
         }
 

@@ -6,6 +6,7 @@ namespace App\Middleware;
 
 use App\Contracts\SessionInterface;
 use App\Exception\ValidationException;
+use App\ResponseFormatter;
 use App\Services\RequestService;
 use Dotenv\Store\File\Reader;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -20,6 +21,7 @@ class ValidationExceptionMiddleware implements MiddlewareInterface
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly SessionInterface $session,
         private readonly RequestService $requestService,
+        private readonly ResponseFormatter $responseFormatter,
     ) {
     }
 
@@ -34,6 +36,11 @@ class ValidationExceptionMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         } catch (ValidationException $e) {
             $response = $this->responseFactory->createResponse();
+
+            if ($this->requestService->isXhr($request)) {
+                return $this->responseFormatter->asJson($response->withStatus(422), $e->errors);
+            }
+
             $referer = $this->requestService->getReferer($request);
             $oldData = $request->getParsedBody();
 
