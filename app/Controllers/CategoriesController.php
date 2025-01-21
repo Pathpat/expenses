@@ -68,7 +68,7 @@ class CategoriesController
     {
         $this->categoryService->delete((int)$args['id']);
 
-        return $response->withHeader('Location', '/categories')->withStatus(302);
+        return $response;
     }
 
     /**
@@ -108,6 +108,6 @@ class CategoriesController
 
         $this->categoryService->update($category, $data['name']);
 
-        return $response;
+        return $this->responseFormatter->asJson($response, $data);
     }
 }
