@@ -9,6 +9,7 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\TransactionRequiredException;
 
 class CategoryService
@@ -29,9 +30,14 @@ class CategoryService
         return $this->update($category, $name);
     }
 
-    public function getAll(): array
+    public function getPaginatedCategories(int $start, int $length): Paginator
     {
-        return $this->entityManager->getRepository(Category::class)->findAll();
+        $query = $this->entityManager->getRepository(Category::class)
+            ->createQueryBuilder('c')
+            ->setFirstResult($start)
+            ->setMaxResults($length);
+
+        return new Paginator($query);
     }
 
     /**
@@ -63,7 +69,7 @@ class CategoryService
     public function update(Category $category, string $name): Category
     {
         $category->setName($name);
-        
+
         $this->entityManager->persist($category);
         $this->entityManager->flush();
 
