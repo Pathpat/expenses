@@ -28,4 +28,22 @@ class ResponseFormatter
 
         return $response;
     }
+
+    /**
+     * @param  ResponseInterface  $response
+     * @param  array  $data
+     * @param  int  $draw
+     * @param  int  $total
+     * @return ResponseInterface
+     * @throws \JsonException
+     */
+    public function asDataTable(ResponseInterface $response, array $data, int $draw, int $total): ResponseInterface
+    {
+        return $this->asJson($response, [
+            'data' => $data,
+            'draw' => $draw,
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+        ]);
+    }
 }
