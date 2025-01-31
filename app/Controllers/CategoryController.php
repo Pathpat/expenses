@@ -21,7 +21,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-class CategoriesController
+class CategoryController
 {
     public function __construct(
         private readonly Twig $twig,
