@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Traits\HasTimestamps;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
 
 #[Entity, table(name: 'transactions')]
+#[HasLifecycleCallbacks]
 class Transaction
 {
+    use HasTimestamps;
     #[Id, Column(options: ['unsigned' => true]), GeneratedValue]
     private int $id;
 
@@ -60,40 +64,20 @@ class Transaction
     }
 
     /**
-     * @return Collection
+     * @return string
      */
-    public function getReceipts(): Collection
+    public function getDescription(): string
     {
-        return $this->receipts;
+        return $this->description;
     }
 
     /**
-     * @param  Receipt  $receipt
-     * @return Transaction
+     * @param  string  $description
+     * @return $this
      */
-    public function addReceipt(Receipt $receipt): Transaction
+    public function setDescription(string $description): Transaction
     {
-        $this->receipts->add($receipt);
-        return $this;
-    }
-
-    /**
-     * @return Category
-     */
-    public function getCategory(): Category
-    {
-        return $this->category;
-    }
-
-    /**
-     * @param  Category  $category
-     * @return Transaction
-     */
-    public function setCategory(Category $category): Transaction
-    {
-        $category->addTransaction($this);
-
-        $this->category = $category;
+        $this->description = $description;
 
         return $this;
     }
@@ -101,38 +85,18 @@ class Transaction
     /**
      * @return \DateTime
      */
-    public function getUpdatedAt(): \DateTime
+    public function getDate(): \DateTime
     {
-        return $this->updatedAt;
+        return $this->date;
     }
 
     /**
-     * @param  \DateTime  $updatedAt
-     * @return Transaction
+     * @param  \DateTime  $date
+     * @return $this
      */
-    public function setUpdatedAt(\DateTime $updatedAt): Transaction
+    public function setDate(\DateTime $date): Transaction
     {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
-    /**
-     * @return User
-     */
-    public function getUser(): User
-    {
-        return $this;
-    }
-
-    /**
-     * @param  User  $user
-     * @return Transaction
-     */
-    public function setUser(User $user): Transaction
-    {
-        $user->addTransaction($this);
-
-        $this->user = $user;
+        $this->date = $date;
 
         return $this;
     }
@@ -147,66 +111,73 @@ class Transaction
 
     /**
      * @param  float  $amount
-     * @return Transaction
+     * @return $this
      */
     public function setAmount(float $amount): Transaction
     {
         $this->amount = $amount;
+
         return $this;
     }
 
     /**
-     * @return \DateTime
+     * @return User
      */
-    public function getCreatedAt(): \DateTime
+    public function getUser(): User
     {
-        return $this->createdAt;
+        return $this->user;
     }
 
     /**
-     * @param  \DateTime  $createdAt
-     * @return Transaction
+     * @param  User  $user
+     * @return $this
      */
-    public function setCreatedAt(\DateTime $createdAt): Transaction
+    public function setUser(User $user): Transaction
     {
-        $this->createdAt = $createdAt;
+        $user->addTransaction($this);
+
+        $this->user = $user;
+
         return $this;
     }
 
     /**
-     * @return \DateTime
+     * @return Category
      */
-    public function getDate(): \DateTime
+    public function getCategory(): Category
     {
-        return $this->date;
+        return $this->category;
     }
 
     /**
-     * @param  \DateTime  $date
-     * @return Transaction
+     * @param  Category  $category
+     * @return $this
      */
-    public function setDate(\DateTime $date): Transaction
+    public function setCategory(Category $category): Transaction
     {
-        $this->date = $date;
+        $category->addTransaction($this);
+
+        $this->category = $category;
+
         return $this;
     }
 
     /**
-     * @return string
+     * @return ArrayCollection|Collection
      */
-    public function getDescription(): string
+    public function getReceipts(): ArrayCollection|Collection
     {
-        return $this->description;
+        return $this->receipts;
     }
 
     /**
-     * @param  string  $description
-     * @return Transaction
+     * @param  Receipt  $receipt
+     * @return $this
      */
-    public function setDescription(string $description): Transaction
+    public function addReceipt(Receipt $receipt): Transaction
     {
-        $this->description = $description;
+        $this->receipts->add($receipt);
+
         return $this;
     }
-
 }
