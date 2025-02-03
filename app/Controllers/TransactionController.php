@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Contracts\RequestValidatorFactoryInterface;
 use App\DataObjects\TransactionData;
+use App\Entity\Receipt;
 use App\Entity\Transaction;
 use App\RequestValidators\TransactionRequestValidator;
 use App\ResponseFormatter;
@@ -172,7 +173,11 @@ class TransactionController
                 'description' => $transaction->getDescription(),
                 'amount'      => $transaction->getAmount(),
                 'date'        => $transaction->getDate()->format('m/d/Y g:i A'),
-                'category'    => $transaction->getCategory()->getName(),
+                'category'    => $transaction->getCategory()?->getName(),
+                'receipts'    => $transaction->getReceipts()->map(fn(Receipt $receipt) => [
+                    'name'        => $receipt->getFilename(),
+                    'id'          => $receipt->getId(),
+                ])->toArray(),
             ];
         };
 
