@@ -38,11 +38,8 @@ class ReceiptController
      * @throws ORMException
      * @throws RandomException
      */
-    public function store(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
+    public function store(Request $request, Response $response, array $args): Response
+    {
         /** @var UploadedFileInterface $file */
         $file = $this->requestValidatorFactory->make(
             UploadReceiptRequestValidator::class
@@ -83,27 +80,16 @@ class ReceiptController
      * @throws TransactionRequiredException
      * @throws FilesystemException
      */
-    public function download(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        $transactionId = (int)$args['transactionId'];
-        $receiptId = (int)$args['id'];
+    public function download(Request $request, Response $response, array $args): Response
+    {
+        $transactionId = (int) $args['transactionId'];
+        $receiptId     = (int) $args['id'];
 
-        if (!$transactionId
-            || !($this->transactionService->getById(
-                $transactionId
-            ))
-        ) {
+        if (! $transactionId || ! $this->transactionService->getById($transactionId)) {
             return $response->withStatus(404);
         }
 
-        if (!$receiptId
-            || !($receipt = $this->receiptService->getById(
-                $receiptId
-            ))
-        ) {
+        if (! $receiptId || ! ($receipt = $this->receiptService->getById($receiptId))) {
             return $response->withStatus(404);
         }
 
@@ -111,24 +97,45 @@ class ReceiptController
             return $response->withStatus(401);
         }
 
-        $file = $this->filesystem->readStream(
-            'receipts/'.$receipt->getStorageFilename()
-        );
+        $file = $this->filesystem->readStream('receipts/' . $receipt->getStorageFilename());
 
-        $response = $response->withHeader(
-            'Content-Disposition',
-            'inline; filename="'.$receipt->getFilename().'"'
-        )->withHeader('Content-Type', $receipt->getMediaType());
+        $response = $response->withHeader('Content-Disposition', 'inline; filename="' . $receipt->getFilename() . '"')
+            ->withHeader('Content-Type', $receipt->getMediaType());
 
         return $response->withBody(new Stream($file));
     }
 
-    public function delete(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        // TODO
+    /**
+     * @param  Request   $request
+     * @param  Response  $response
+     * @param  array     $args
+     *
+     * @return Response
+     * @throws FilesystemException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
+    public function delete(Request $request, Response $response, array $args): Response
+    {
+        $transactionId = (int)$args['transactionId'];
+        $receiptId = (int)$args['id'];
+
+        if (!$transactionId || !$this->transactionService->getById($transactionId)) {
+            return $response->withStatus(404);
+        }
+
+        if (!$receiptId || !($receipt = $this->receiptService->getById($receiptId))) {
+            return $response->withStatus(404);
+        }
+
+        if ($receipt->getTransaction()->getId() !== $transactionId) {
+            return $response->withStatus(401);
+        }
+
+        $this->filesystem->delete('receipts/'.$receipt->getStorageFilename());
+
+        $this->receiptService->delete($receipt);
 
         return $response;
     }

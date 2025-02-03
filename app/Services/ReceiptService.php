@@ -54,4 +54,17 @@ class ReceiptService
     {
         return $this->entityManager->find(Receipt::class, $id);
     }
+
+    /**
+     * @param  Receipt  $receipt
+     *
+     * @return void
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function delete(Receipt $receipt): void
+    {
+        $this->entityManager->remove($receipt);
+        $this->entityManager->flush();
+    }
 }
