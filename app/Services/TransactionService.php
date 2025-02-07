@@ -14,11 +14,8 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\TransactionRequiredException;
 
-class TransactionService
+class TransactionService extends EntityManagerService
 {
-    public function __construct(private readonly EntityManager $entityManager)
-    {
-    }
 
     /**
      * @param  TransactionData  $transactionData
@@ -80,7 +77,6 @@ class TransactionService
         $transaction = $this->entityManager->find(Transaction::class, $id);
 
         $this->entityManager->remove($transaction);
-        $this->entityManager->flush();
     }
 
     /**
@@ -114,5 +110,12 @@ class TransactionService
         $this->entityManager->persist($transaction);
 
         return $transaction;
+    }
+
+    public function toggleReviewed(Transaction $transaction): void
+    {
+        $transaction->setWasReviewed(! $transaction->wasReviewed());
+
+        $this->entityManager->persist($transaction);
     }
 }
