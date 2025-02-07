@@ -46,7 +46,7 @@ class TransactionImporterController
             [$date, $description, $category, $amount] = $row;
 
             $date     = new \DateTime($date);
-            $category = $categories[$category] ?? null;
+            $category = $categories[strtolower($category)] ?? null;
             $amount   = str_replace(['$', ','], '', $amount);
 
             $transactionData = new TransactionData($description, (float) $amount, $date, $category);
