@@ -70,6 +70,8 @@ class TransactionController
             $request->getAttribute('user')
         );
 
+        $this->transactionService->flush();
+
         return $response;
     }
 
@@ -86,6 +88,8 @@ class TransactionController
     public function delete(Request $request, Response $response, array $args): Response
     {
         $this->transactionService->delete((int) $args['id']);
+
+        $this->transactionService->flush();
 
         return $response;
     }
@@ -153,6 +157,8 @@ class TransactionController
             )
         );
 
+        $this->transactionService->flush();
+
         return $response;
     }
 
@@ -174,6 +180,7 @@ class TransactionController
                 'amount'      => $transaction->getAmount(),
                 'date'        => $transaction->getDate()->format('m/d/Y g:i A'),
                 'category'    => $transaction->getCategory()?->getName(),
+                'wasReviewed' => $transaction->wasReviewed(),
                 'receipts'    => $transaction->getReceipts()->map(fn(Receipt $receipt) => [
                     'name'        => $receipt->getFilename(),
                     'id'          => $receipt->getId(),
@@ -189,5 +196,28 @@ class TransactionController
             $params->draw,
             $totalTransactions
         );
+    }
+
+    /**
+     * @param  Request   $request
+     * @param  Response  $response
+     * @param  array     $args
+     *
+     * @return Response
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
+    public function toggleReviewed(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) $args['id'];
+
+        if (! $id || ! ($transaction = $this->transactionService->getById($id))) {
+            return $response->withStatus(404);
+        }
+        $this->transactionService->toggleReviewed($transaction);
+        $this->transactionService->flush();
+
+        return $response;
     }
 }

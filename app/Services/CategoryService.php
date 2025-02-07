@@ -13,11 +13,8 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\TransactionRequiredException;
 
-class CategoryService
+class CategoryService extends EntityManagerService
 {
-    public function __construct(private readonly EntityManager $entityManager)
-    {
-    }
 
     /**
      * @throws ORMException
@@ -60,7 +57,6 @@ class CategoryService
     {
         $category = $this->entityManager->find(Category::class, $id);
         $this->entityManager->remove($category);
-        $this->entityManager->flush();
     }
 
     /**
@@ -82,7 +78,6 @@ class CategoryService
         $category->setName($name);
 
         $this->entityManager->persist($category);
-        $this->entityManager->flush();
 
         return $category;
     }
