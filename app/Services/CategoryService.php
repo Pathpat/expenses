@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\EntityManagerServiceInterface;
 use App\DataObjects\DataTableQueryParams;
 use App\Entity\Category;
 use App\Entity\User;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\TransactionRequiredException;
 
-class CategoryService extends EntityManagerService
+class CategoryService
 {
+    public function __construct(private readonly EntityManagerServiceInterface $entityManager)
+    {
+    }
 
     /**
      * @throws ORMException
@@ -53,17 +56,6 @@ class CategoryService extends EntityManagerService
      * @throws TransactionRequiredException
      * @throws ORMException
      */
-    public function delete(int $id): void
-    {
-        $category = $this->entityManager->find(Category::class, $id);
-        $this->entityManager->remove($category);
-    }
-
-    /**
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
-     * @throws ORMException
-     */
     public function getById(int $id): ?Category
     {
         return $this->entityManager->find(Category::class, $id);
@@ -76,8 +68,6 @@ class CategoryService extends EntityManagerService
     public function update(Category $category, string $name): Category
     {
         $category->setName($name);
-
-        $this->entityManager->persist($category);
 
         return $category;
     }

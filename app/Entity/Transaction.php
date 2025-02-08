@@ -26,7 +26,7 @@ class Transaction
     private int $id;
 
     #[Column(name: 'was_reviewed', options: ['default' => 0])]
-    private bool $was_reviewed;
+    private bool $wasReviewed;
 
     #[Column]
     private string $description;
@@ -56,6 +56,7 @@ class Transaction
     public function __construct()
     {
         $this->receipts = new ArrayCollection();
+        $this->wasReviewed = false;
     }
 
     /**
@@ -185,7 +186,7 @@ class Transaction
      */
     public function wasReviewed(): bool
     {
-        return $this->was_reviewed;
+        return $this->wasReviewed;
     }
 
     /**
@@ -193,9 +194,9 @@ class Transaction
      *
      * @return $this
      */
-    public function setWasReviewed(bool $was_reviewed): Transaction
+    public function setWasReviewed(bool $wasReviewed): Transaction
     {
-        $this->was_reviewed = $was_reviewed;
+        $this->wasReviewed = $wasReviewed;
 
         return $this;
     }
