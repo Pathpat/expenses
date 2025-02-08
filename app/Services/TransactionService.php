@@ -8,14 +8,17 @@ use App\DataObjects\DataTableQueryParams;
 use App\DataObjects\TransactionData;
 use App\Entity\Transaction;
 use App\Entity\User;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\TransactionRequiredException;
 
-class TransactionService extends EntityManagerService
+class TransactionService
 {
+    public function __construct(private readonly EntityManagerInterface $entityManager)
+    {
+    }
 
     /**
      * @param  TransactionData  $transactionData
@@ -68,18 +71,6 @@ class TransactionService extends EntityManagerService
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws TransactionRequiredException
-     */
-    public function delete(int $id): void
-    {
-        $transaction = $this->entityManager->find(Transaction::class, $id);
-
-        $this->entityManager->remove($transaction);
-    }
-
-    /**
      * @param  int  $id
      *
      * @return Transaction|null
@@ -107,15 +98,16 @@ class TransactionService extends EntityManagerService
         $transaction->setDate($transactionData->date);
         $transaction->setCategory($transactionData->category);
 
-        $this->entityManager->persist($transaction);
-
         return $transaction;
     }
 
+    /**
+     * @param  Transaction  $transaction
+     *
+     * @return void
+     */
     public function toggleReviewed(Transaction $transaction): void
     {
         $transaction->setWasReviewed(! $transaction->wasReviewed());
-
-        $this->entityManager->persist($transaction);
     }
 }

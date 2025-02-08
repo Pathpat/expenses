@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Entity\Receipt;
+use Doctrine\ORM\EntityManagerInterface;
 
-class ReceiptService extends EntityManagerService
+class ReceiptService
 {
+    public function __construct(private readonly EntityManagerInterface $entityManager)
+    {
+    }
 
     /**
      * @param                  $transaction
@@ -17,12 +21,8 @@ class ReceiptService extends EntityManagerService
      * @return Receipt
      * @throws \Doctrine\ORM\Exception\ORMException
      */
-    public function create(
-        $transaction,
-        string $filename,
-        string $storageFilename,
-        string $mediaType
-    ): Receipt {
+    public function create($transaction, string $filename, string $storageFilename, string $mediaType): Receipt
+    {
         $receipt = new Receipt();
 
         $receipt->setTransaction($transaction);
@@ -30,8 +30,6 @@ class ReceiptService extends EntityManagerService
         $receipt->setStorageFilename($storageFilename);
         $receipt->setMediaType($mediaType);
         $receipt->setCreatedAt(new \DateTime());
-
-        $this->entityManager->persist($receipt);
 
         return $receipt;
     }
@@ -47,17 +45,5 @@ class ReceiptService extends EntityManagerService
     public function getById(int $id)
     {
         return $this->entityManager->find(Receipt::class, $id);
-    }
-
-    /**
-     * @param  Receipt  $receipt
-     *
-     * @return void
-     * @throws \Doctrine\ORM\Exception\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function delete(Receipt $receipt): void
-    {
-        $this->entityManager->remove($receipt);
     }
 }
