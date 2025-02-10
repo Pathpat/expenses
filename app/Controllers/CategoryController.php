@@ -39,7 +39,7 @@ class CategoryController
      * @throws RuntimeError
      * @throws LoaderError
      */
-    public function index(Request $request, Response $response): Response
+    public function index(Response $response): Response
     {
         return $this->twig->render($response, 'categories/index.twig');
     }
@@ -65,9 +65,8 @@ class CategoryController
      * @throws TransactionRequiredException
      * @throws ORMException
      */
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Response $response, Category $category): Response
     {
-        $category = $this->categoryService->getById((int)$args['id']);
         $this->entityManagerService->delete($category, true);
 
         return $response;
@@ -78,14 +77,8 @@ class CategoryController
      * @throws TransactionRequiredException
      * @throws ORMException
      */
-    public function get(Request $request, Response $response, array $args): Response
+    public function get(Response $response, Category $category): Response
     {
-        $category = $this->categoryService->getById((int)$args['id']);
-
-        if (!$category) {
-            return $response->withStatus(404);
-        }
-
         $data = ['id' => $category->getId(), 'name' => $category->getName()];
 
         return $this->responseFormatter->asJson($response, $data);
@@ -97,16 +90,11 @@ class CategoryController
      * @throws TransactionRequiredException
      * @throws \JsonException
      */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $request, Response $response, Category $category): Response
     {
         $data = $this->requestValidatorFactory->make(UpdateCategoryRequestValidator::class)->validate(
-            $args + $request->getParsedBody()
+            $request->getParsedBody()
         );
-        $category = $this->categoryService->getById((int)$data['id']);
-
-        if (!$category) {
-            return $response->withStatus(404);
-        }
 
         $this->entityManagerService->sync($this->categoryService->update($category, $data['name']));
 
