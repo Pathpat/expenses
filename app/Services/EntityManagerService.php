@@ -79,4 +79,17 @@ class EntityManagerService implements EntityManagerServiceInterface
             $this->entityManager->detach($entity);
         }
     }
+
+    /**
+     * @param  int  $userId
+     *
+     * @return void
+     */
+    public function enableUserAuthFilter(int $userId): void
+    {
+        $this->getFilters()->enable('user')->setParameter(
+            'user_id',
+            $userId
+        );
+    }
 }
