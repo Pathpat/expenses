@@ -9,6 +9,7 @@ use App\Contracts\UserInterface;
 use App\Contracts\UserProviderServiceInterface;
 use App\DataObjects\RegisterUserData;
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 
@@ -53,5 +54,16 @@ class UserProviderService implements UserProviderServiceInterface
         $this->entityManager->sync($user);
 
         return $user;
+    }
+
+    /**
+     * @param  UserInterface  $user
+     *
+     * @return void
+     */
+    public function verifyUser(UserInterface $user): void
+    {
+        $user->setVerifiedAt(new DateTime());
+        $this->entityManager->sync($user);
     }
 }
