@@ -204,4 +204,16 @@ class User implements UserInterface
     {
         return $this->verifiedAt;
     }
+
+    /**
+     * @param  \DateTime  $verifiedAt
+     *
+     * @return $this
+     */
+    public function setVerifiedAt(\DateTime $verifiedAt): static
+    {
+        $this->verifiedAt = $verifiedAt;
+
+        return $this;
+    }
 }

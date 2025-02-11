@@ -10,6 +10,7 @@ use App\Contracts\UserInterface;
 use App\Contracts\UserProviderServiceInterface;
 use App\DataObjects\RegisterUserData;
 use App\Mail\SignupEmail;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class Auth implements AuthInterface
 {
@@ -88,7 +89,9 @@ class Auth implements AuthInterface
 
     /**
      * @param  RegisterUserData  $data
+     *
      * @return UserInterface
+     * @throws TransportExceptionInterface
      */
     public function register(RegisterUserData $data): UserInterface
     {
@@ -96,7 +99,7 @@ class Auth implements AuthInterface
 
         $this->logIn($user);
 
-        $this->signupEmail->send($user->getEmail());
+        $this->signupEmail->send($user);
 
         return $user;
     }
