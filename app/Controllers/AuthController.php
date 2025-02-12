@@ -7,24 +7,25 @@ namespace App\Controllers;
 use App\Contracts\AuthInterface;
 use App\Contracts\RequestValidatorFactoryInterface;
 use App\DataObjects\RegisterUserData;
+use App\Enum\AuthAttemptStatus;
 use App\Exception\ValidationException;
 use App\RequestValidators\RegisterUserRequestValidator;
 use App\RequestValidators\UserLoginRequestValidator;
-use Doctrine\ORM\Exception\ORMException;
+use App\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Views\Twig;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
-use Valitron\Validator;
 
 class AuthController
 {
     public function __construct(
         private readonly Twig $twig,
         private readonly RequestValidatorFactoryInterface $requestValidatorFactory,
-        private readonly AuthInterface $auth
+        private readonly AuthInterface $auth,
+        private readonly ResponseFormatter $responseFormatter,
     ) {
     }
 
@@ -67,9 +68,11 @@ class AuthController
     }
 
     /**
-     * @param  Request  $request
+     * @param  Request   $request
      * @param  Response  $response
+     *
      * @return Response
+     * @throws \JsonException
      */
     public function logIn(Request $request, Response $response): Response
     {
@@ -77,11 +80,17 @@ class AuthController
             $request->getParsedBody()
         );
 
-        if (!$this->auth->attemptLogin($data)) {
+        $status = $this->auth->attemptLogin($data);
+
+        if ($status === AuthAttemptStatus::Failed) {
             throw new ValidationException(['password' => ['You have entered an invalid username or password.']]);
         }
 
-        return $response->withHeader('Location', '/')->withStatus(302);
+        if ($status === AuthAttemptStatus::TWO_FACTOR_AUTH) {
+            return $this->responseFormatter->asJson($response, ['two_factor' => true]);
+        }
+
+        return $this->responseFormatter->asJson($response, []);
     }
 
     /**

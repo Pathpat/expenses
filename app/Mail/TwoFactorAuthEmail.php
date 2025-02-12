@@ -6,13 +6,13 @@ namespace App\Mail;
 
 use App\Config;
 use App\Entity\User;
+use App\Entity\UserLoginCode;
 use App\SignedUrl;
-use Slim\Interfaces\RouteParserInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\BodyRendererInterface;
 
-class SignupEmail
+class TwoFactorAuthEmail
 {
     public function __construct(
         private readonly Config $config,
@@ -28,30 +28,22 @@ class SignupEmail
      * @return void
      * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
-    public function send(User $user): void
+    public function send(UserLoginCode $userLoginCode): void
     {
-        $email = $user->getEmail();
-        $expirationDate = new \DateTime('+30 minutes');
-        $activationLink = $this->signedUrl->fromRoute(
-            routeName:'verify',
-            routeParams: [
-                'id' => $user->getId(),
-                'hash' => sha1($email)
-            ],
-            expirationDate: $expirationDate
-        );
-
+        $email   = $userLoginCode->getUser()->getEmail();
         $message = (new TemplatedEmail())
             ->from($this->config->get('mailer.from'))
             ->to($email)
-            ->subject('Welcome to '.$this->config->get('app_name'))
-            ->htmlTemplate('emails/signup.html.twig')
-            ->context([
-                'activationLink' => $activationLink,
-                'expirationDate' => $expirationDate,
-            ]);
+            ->subject('Your Expennies Verification Code')
+            ->htmlTemplate('emails/two_factor.html.twig')
+            ->context(
+                [
+                    'code' => $userLoginCode->getCode(),
+                ]
+            );
 
         $this->renderer->render($message);
+
         $this->mailer->send($message);
     }
 }
