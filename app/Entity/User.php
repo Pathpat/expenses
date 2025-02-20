@@ -38,6 +38,9 @@ class User implements UserInterface
     #[Column(type: 'string', length: 255)]
     private string $password;
 
+    #[Column(name: 'two_factor', options: ['default' => false])]
+    private bool $twoFactor;
+
     #[Column(name: 'verified_at', nullable: true)]
     private ?\DateTime $verifiedAt;
 
@@ -51,6 +54,7 @@ class User implements UserInterface
     {
         $this->transactions = new ArrayCollection();
         $this->categories = new ArrayCollection();
+        $this->twoFactor = false;
     }
 
     /**
@@ -222,8 +226,18 @@ class User implements UserInterface
      */
     public function hasTwoFactorAuthEnabled(): bool
     {
-        // TODO: Implement hasTwoFactorAuthEnable() method.
+        return $this->twoFactor;
+    }
 
-        return true;
+    /**
+     * @param  bool  $twoFactor
+     *
+     * @return $this
+     */
+    public function setTwoFactor(bool $twoFactor): User
+    {
+        $this->twoFactor = $twoFactor;
+
+        return $this;
     }
 }
